@@ -2,8 +2,33 @@
 import { useState, useCallback } from "react";
 import ColumnSelector from "../components/ColumnSelector";
 
-const TableComponent = ({ data, initialColumns }) => {
-  const [columns, setColumns] = useState(initialColumns);
+const TableComponent = ({ data, initialColumns, tableId }) => {
+  const defaultColumns = [
+    {
+      Header: "Select",
+      accessor: "select",
+      pinned: "left",
+      width: 60,
+      Cell: () => <input type="checkbox" />,
+    },
+    {
+      Header: "S. No.",
+      accessor: "serialNumber",
+      pinned: "left",
+      width: 60,
+      Cell: (_, idx) => idx + 1,
+    },
+  ];
+
+  const actionColumn = {
+    Header: "Actions",
+    accessor: "actions",
+    pinned: "right",
+    width: 80,
+    Cell: () => <button className="text-blue-500 hover:underline">Edit</button>,
+  };
+
+  const [columns, setColumns] = useState([...defaultColumns, ...initialColumns, actionColumn]);
   const [hiddenColumns, setHiddenColumns] = useState([]);
   const [draggedColumnIndex, setDraggedColumnIndex] = useState(null);
 
@@ -39,11 +64,12 @@ const TableComponent = ({ data, initialColumns }) => {
 
   // Drag and drop handlers
   const handleDragStart = (index) => {
+    if (columns[index].pinned) return;
     setDraggedColumnIndex(index);
   };
 
   const handleDragOver = (index) => {
-    if (draggedColumnIndex === null || draggedColumnIndex === index) return;
+    if (draggedColumnIndex === null || draggedColumnIndex === index || columns[index].pinned) return;
     setColumns((prev) => {
       const newColumns = [...prev];
       const [draggedColumn] = newColumns.splice(draggedColumnIndex, 1);

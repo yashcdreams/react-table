@@ -29,20 +29,6 @@ const DemoPage = () => {
   ]);
 
   const initialColumns = [
-    {
-      Header: "Select",
-      accessor: "select",
-      pinned: "left",
-      width: 60,
-      Cell: () => <input type="checkbox" />,
-    },
-    {
-      Header: "S. No.",
-      accessor: "serialNumber",
-      pinned: "left",
-      width: 60,
-      Cell: (_, idx) => idx + 1,
-    },
     { Header: "Name", accessor: "name" },
     { Header: "Email", accessor: "email" },
     { Header: "City", accessor: "city" },
@@ -50,19 +36,12 @@ const DemoPage = () => {
     { Header: "Phone", accessor: "phone" },
     { Header: "Created Date", accessor: "createdDate" },
     { Header: "Status", accessor: "status", pinned: "right" },
-    {
-      Header: "Actions",
-      accessor: "actions",
-      pinned: "right",
-      width: 80,
-      Cell: () => <button className="text-blue-500 hover:underline">Edit</button>,
-    },
   ];
 
   return (
     <div className="p-4">
       <h1 className="text-xl font-bold mb-4">Demo Table</h1>
-      <TableComponent data={data} initialColumns={initialColumns} />
+      <TableComponent data={data} initialColumns={initialColumns} tableId="demo" />
     </div>
   );
 };
