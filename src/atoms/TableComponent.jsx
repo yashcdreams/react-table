@@ -2,21 +2,23 @@
 import { useState, useCallback } from "react";
 import ColumnSelector from "../components/ColumnSelector";
 
-const TableComponent = ({ data, initialColumns, tableId }) => {
+const TableComponent = ({ data, initialColumns, tableId, currentPage, itemsPerPage }) => {
   const defaultColumns = [
     {
-      Header: "Select",
+      Header: () => <input type="checkbox" onChange={(e) => handleSelectAll(e.target.checked)} />,
       accessor: "select",
       pinned: "left",
       width: 60,
-      Cell: () => <input type="checkbox" />,
+      Cell: ({ rowIndex }) => (
+        <input type="checkbox" checked={selectedRows.includes(rowIndex)} onChange={() => handleSelectRow(rowIndex)} />
+      ),
     },
     {
       Header: "S. No.",
       accessor: "serialNumber",
       pinned: "left",
       width: 60,
-      Cell: (_, idx) => idx + 1,
+      Cell: ({ rowIndex }) => getSerialNumber(rowIndex),
     },
   ];
 
@@ -31,6 +33,7 @@ const TableComponent = ({ data, initialColumns, tableId }) => {
   const [columns, setColumns] = useState([...defaultColumns, ...initialColumns, actionColumn]);
   const [hiddenColumns, setHiddenColumns] = useState([]);
   const [draggedColumnIndex, setDraggedColumnIndex] = useState(null);
+  const [selectedRows, setSelectedRows] = useState([]);
 
   // Compute pinned columns
   const pinnedColumns = {
@@ -111,6 +114,29 @@ const TableComponent = ({ data, initialColumns, tableId }) => {
     }
   });
 
+  // Handle select all checkbox
+  const handleSelectAll = (isChecked) => {
+    if (isChecked) {
+      setSelectedRows(data.map((_, index) => index));
+    } else {
+      setSelectedRows([]);
+    }
+  };
+
+  // Handle individual row selection
+  const handleSelectRow = (rowIndex) => {
+    setSelectedRows((prev) =>
+      prev.includes(rowIndex) ? prev.filter((index) => index !== rowIndex) : [...prev, rowIndex]
+    );
+  };
+
+  // Get serial number
+  const getSerialNumber = (index) => {
+    const activePage = currentPage || 1;
+    const activeItemsPerPage = itemsPerPage || 10;
+    return ((activePage - 1) * activeItemsPerPage + (index + 1)).toString().padStart(3, "0");
+  };
+
   return (
     <div>
       <div className="flex justify-end items-center mb-4 space-x-2">
@@ -151,7 +177,7 @@ const TableComponent = ({ data, initialColumns, tableId }) => {
                     className={`p-2 border text-left cursor-move ${stickyClass}`}
                   >
                     <div className="flex items-center justify-between">
-                      <span>{col.Header}</span>
+                      <span>{typeof col.Header === "function" ? col.Header() : col.Header}</span>
                       {/* Allow pin toggle for columns (skip fixed ones like select, serialNumber, actions) */}
                       {!["select", "serialNumber", "status", "actions"].includes(col.accessor) && (
                         <button
@@ -191,7 +217,7 @@ const TableComponent = ({ data, initialColumns, tableId }) => {
 
                   return (
                     <td key={col.accessor} style={pinnedStyle} className={`p-2 border ${stickyClass}`}>
-                      {col.Cell ? col.Cell(row, rowIndex) : row[col.accessor] ?? "-"}
+                      {col.Cell ? col.Cell({ row, rowIndex }) : row[col.accessor] ?? "-"}
                     </td>
                   );
                 })}
