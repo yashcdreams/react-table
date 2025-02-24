@@ -12,10 +12,12 @@ const Dashboard = () => {
   };
 
   return (
-    <div>
+    <div className="flex flex-col items-center space-y-8">
       <h1>Dashboard (Protected)</h1>
       <p>This page is protected and requires authentication.</p>
-      <button onClick={handleLogout}>Log out</button>
+      <button className="border border-gray text-primary font-semibold p-2 rounded-xl" onClick={handleLogout}>
+        Log out
+      </button>
       <p>
         <Link to={PathConstants.Home}>Back to Home</Link>
       </p>
